@@ -1,3 +1,12 @@
+/// Convenience wrapper for making get calls involving arrays.
+macro_rules! cci_get_array {
+    ($function:ident($($arg0:expr,)+ _: $type:ty $(, $arg1:expr)*$(,)*)) => ({
+        let mut value: $type = unsafe { ::std::mem::uninitialized() };
+        let error = unsafe { $function($($arg0,)* value.as_mut_ptr(), $($arg1),* ) };
+        if error == ErrorCode::OK { Ok(value) } else { Err(error) }
+    })
+}
+
 /// Convenience wrapper for making simple get calls.
 macro_rules! cci_get_call {
     ($function:ident($($arg0:expr,)+ _: $type:ty $(, $arg1:expr)*$(,)*)) => ({

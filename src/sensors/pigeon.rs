@@ -1,7 +1,7 @@
 //! Pigeon IMU
 
-use ctre_sys::pigeon::*;
-pub use ctre_sys::pigeon::{
+use ctre_sys::*;
+pub use ctre_sys::ctre::phoenix::sensors::{
     PigeonIMU_ControlFrame as ControlFrame, PigeonIMU_StatusFrame as StatusFrame,
 };
 use std::fmt;
@@ -234,13 +234,15 @@ impl StickyFaults {
 }
 impl_binary_fmt!(StickyFaults);
 
+
+use std::os::raw::c_void;
 /**
  * Pigeon IMU Class.
  * Class supports communicating over CANbus and over ribbon-cable (CAN Talon SRX).
  */
 #[derive(Debug)]
 pub struct PigeonIMU {
-    handle: Handle,
+    handle: *mut c_void,
 }
 impl PigeonIMU {
     /// Create a Pigeon object that communicates with Pigeon on CAN Bus.
@@ -319,7 +321,7 @@ impl PigeonIMU {
         timeout_ms: i32,
     ) -> ErrorCode {
         unsafe {
-            c_PigeonIMU_ConfigTemperatureCompensationEnable(self.handle, enable as _, timeout_ms)
+            c_PigeonIMU_SetTemperatureCompensationDisable(self.handle, !enable as _, timeout_ms)
         }
     }
 
@@ -375,12 +377,12 @@ impl PigeonIMU {
     /// Get 6d Quaternion data.
     /// Returns an array of the wxyz quaternion data.
     pub fn get_6d_quaternion(&self) -> Result<[f64; 4]> {
-        cci_get_call!(c_PigeonIMU_Get6dQuaternion(self.handle, _: [f64; 4]))
+        cci_get_array!(c_PigeonIMU_Get6dQuaternion(self.handle, _: [f64; 4]))
     }
     /// Get Yaw, Pitch, and Roll data.
     /// Returns an array with yaw, pitch, and roll, in that order.
     pub fn get_yaw_pitch_roll(&self) -> Result<[f64; 3]> {
-        cci_get_call!(c_PigeonIMU_GetYawPitchRoll(self.handle, _: [f64; 3]))
+        cci_get_array!(c_PigeonIMU_GetYawPitchRoll(self.handle, _: [f64; 3]))
     }
     /**
      * Get AccumGyro data.
@@ -389,7 +391,7 @@ impl PigeonIMU {
      * Returns an array `xyz_deg`.
      */
     pub fn get_accum_gyro(&self) -> Result<[f64; 3]> {
-        cci_get_call!(c_PigeonIMU_GetAccumGyro(self.handle, _: [f64; 3]))
+        cci_get_array!(c_PigeonIMU_GetAccumGyro(self.handle, _: [f64; 3]))
     }
     /// Get the absolute compass heading, in the interval [0, 360) degrees.
     pub fn get_absolute_compass_heading(&self) -> Result<f64> {
@@ -417,27 +419,27 @@ impl PigeonIMU {
     /// Get Raw Magnetometer data.
     /// Returns an array `rm_xyz`.  Number is equal to 0.6 microteslas per unit.
     pub fn get_raw_magnetometer(&self) -> Result<[i16; 3]> {
-        cci_get_call!(c_PigeonIMU_GetRawMagnetometer(self.handle, _: [i16; 3]))
+        cci_get_array!(c_PigeonIMU_GetRawMagnetometer(self.handle, _: [i16; 3]))
     }
     /// Get Biased Magnetometer data.
     /// Returns an array `bm_xyz`.  Number is equal to 0.6 microteslas per unit.
     pub fn get_biased_magnetometer(&self) -> Result<[i16; 3]> {
-        cci_get_call!(c_PigeonIMU_GetBiasedMagnetometer(self.handle, _: [i16; 3]))
+        cci_get_array!(c_PigeonIMU_GetBiasedMagnetometer(self.handle, _: [i16; 3]))
     }
     /// Get Biased Accelerometer data.
     /// Returns an array `ba_xyz`.  These are in fixed point notation Q2.14.  eg. 16384 = 1G
     pub fn get_biased_accelerometer(&self) -> Result<[i16; 3]> {
-        cci_get_call!(c_PigeonIMU_GetBiasedAccelerometer(self.handle, _: [i16; 3]))
+        cci_get_array!(c_PigeonIMU_GetBiasedAccelerometer(self.handle, _: [i16; 3]))
     }
     /// Get Raw Gyro data.
     /// Returns an array `xyz_dps`, with data in degrees per second.
     pub fn get_raw_gyro(&self) -> Result<[f64; 3]> {
-        cci_get_call!(c_PigeonIMU_GetRawGyro(self.handle, _: [f64; 3]))
+        cci_get_array!(c_PigeonIMU_GetRawGyro(self.handle, _: [f64; 3]))
     }
     /// Get Accelerometer tilt angles.
     /// Returns a 3-array of x, y, z angles in degrees.
     pub fn get_accelerometer_angles(&self) -> Result<[f64; 3]> {
-        cci_get_call!(c_PigeonIMU_GetAccelerometerAngles(self.handle, _: [f64; 3]))
+        cci_get_array!(c_PigeonIMU_GetAccelerometerAngles(self.handle, _: [f64; 3]))
     }
 
     /// Get the current Fusion Status (including fused heading)
@@ -532,7 +534,7 @@ impl PigeonIMU {
         &mut self,
         param: ParamEnum,
         value: f64,
-        sub_value: i32,
+        sub_value: u8,
         ordinal: i32,
         timeout_ms: i32,
     ) -> ErrorCode {
@@ -579,7 +581,7 @@ impl PigeonIMU {
     pub fn set_status_frame_period(
         &self,
         frame: StatusFrame,
-        period_ms: i32,
+        period_ms: u8,
         timeout_ms: i32,
     ) -> ErrorCode {
         unsafe { c_PigeonIMU_SetStatusFramePeriod(self.handle, frame as _, period_ms, timeout_ms) }

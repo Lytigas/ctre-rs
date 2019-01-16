@@ -4,7 +4,7 @@ extern crate ctre_sys;
 #[cfg(feature = "usage-reporting")]
 extern crate wpilib_sys;
 
-pub use ctre_sys::{ErrorCode, ParamEnum};
+pub use ctre_sys::ctre::phoenix::{ErrorCode, ParamEnum};
 
 /// A specialised `Result` for CTRE methods.
 pub type Result<T> = std::result::Result<T, ErrorCode>;

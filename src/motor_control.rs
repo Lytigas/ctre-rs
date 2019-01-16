@@ -1,7 +1,8 @@
 //! Support for motor controllers (Talon SRX and Victor SPX).
+use std::ffi::c_void;
 
-use ctre_sys::mot::*;
-pub use ctre_sys::mot::{
+use ctre_sys::*;
+pub use ctre_sys::ctre::phoenix::motorcontrol::{
     ControlFrame, ControlFrameEnhanced, ControlMode, DemandType, FeedbackDevice, FollowerType,
     LimitSwitchNormal, LimitSwitchSource, NeutralMode, RemoteFeedbackDevice,
     RemoteLimitSwitchSource, RemoteSensorSource, SensorTerm, StatusFrame, StatusFrameEnhanced,
@@ -11,7 +12,7 @@ pub use ctre_sys::mot::{
 use wpilib_sys::usage::report_usage;
 
 use super::{
-    motion::{MotionProfileStatus, TrajectoryPoint},
+    ctre_sys::ctre::phoenix::motion::{MotionProfileStatus, TrajectoryPoint},
     ErrorCode, ParamEnum, Result,
 };
 
@@ -109,7 +110,7 @@ pub trait MotorController: private::Sealed {
         Self: Sized;
 
     #[doc(hidden)]
-    fn handle(&self) -> Handle;
+    fn handle(&self) -> *mut c_void;
     fn get_base_id(&self) -> i32;
     fn get_device_id(&self) -> i32 {
         cci_get_only!(c_MotController_GetDeviceNumber(self.handle(), _: i32))
@@ -477,7 +478,7 @@ pub trait MotorController: private::Sealed {
     fn set_status_frame_period(
         &self,
         frame: StatusFrame,
-        period_ms: i32,
+        period_ms: u8,
         timeout_ms: i32,
     ) -> ErrorCode {
         unsafe {
@@ -678,7 +679,7 @@ pub trait MotorController: private::Sealed {
     }
     fn config_aux_pid_polarity(&mut self, invert: bool, timeout_ms: i32) -> ErrorCode {
         self.config_set_parameter(
-            ParamEnum::PIDLoopPolarity,
+            ParamEnum::ePIDLoopPolarity,
             invert as i8 as f64,
             0,
             1,
@@ -776,12 +777,12 @@ pub trait MotorController: private::Sealed {
                 self.handle(),
                 traj_pt.position,
                 traj_pt.velocity,
-                traj_pt.auxiliary_pos,
-                traj_pt.profile_slot_select_0 as _, // wtf CTRE???
-                traj_pt.profile_slot_select_1 as _,
-                traj_pt.is_last_point,
-                traj_pt.zero_pos,
-                traj_pt.time_dur as _,
+                traj_pt.auxiliaryPos,
+                traj_pt.profileSlotSelect0 as _, // wtf CTRE???
+                traj_pt.profileSlotSelect1 as _,
+                traj_pt.isLastPoint,
+                traj_pt.zeroPos,
+                traj_pt.timeDur as _,
             )
         }
     }
@@ -816,20 +817,20 @@ pub trait MotorController: private::Sealed {
         let code = unsafe {
             c_MotController_GetMotionProfileStatus_2(
                 self.handle(),
-                &mut status_to_fill.top_buffer_rem,
-                &mut status_to_fill.top_buffer_cnt,
-                &mut status_to_fill.btm_buffer_cnt,
-                &mut status_to_fill.has_underrun,
-                &mut status_to_fill.is_underrun,
-                &mut status_to_fill.active_point_valid,
-                &mut status_to_fill.is_last,
-                &mut status_to_fill.profile_slot_select_0,
+                &mut status_to_fill.topBufferRem,
+                &mut status_to_fill.topBufferCnt,
+                &mut status_to_fill.btmBufferCnt,
+                &mut status_to_fill.hasUnderrun,
+                &mut status_to_fill.isUnderrun,
+                &mut status_to_fill.activePointValid,
+                &mut status_to_fill.isLast,
+                &mut status_to_fill.profileSlotSelect0,
                 &mut output_enable,
-                &mut status_to_fill.time_dur_ms,
-                &mut status_to_fill.profile_slot_select_1,
+                &mut status_to_fill.timeDurMs,
+                &mut status_to_fill.profileSlotSelect1,
             )
         };
-        status_to_fill.output_enable = output_enable.into();
+        status_to_fill.outputEnable = output_enable.into();
         code
     }
     /// Get all motion profile status information.  This returns a new MotionProfileStatus.
@@ -1078,7 +1079,7 @@ pub trait SensorCollection: MotorController {
 /// CTRE Talon SRX Motor Controller when used on CAN Bus.
 #[derive(Debug)]
 pub struct TalonSRX {
-    handle: Handle,
+    handle: *mut c_void,
     arb_id: i32,
 }
 
@@ -1093,7 +1094,7 @@ impl MotorController for TalonSRX {
     }
 
     #[doc(hidden)]
-    fn handle(&self) -> Handle {
+    fn handle(&self) -> *mut c_void {
         self.handle
     }
     fn get_base_id(&self) -> i32 {
@@ -1145,7 +1146,7 @@ impl TalonSRX {
     pub fn set_status_frame_period(
         &self,
         frame: StatusFrameEnhanced,
-        period_ms: i32,
+        period_ms: u8,
         timeout_ms: i32,
     ) -> ErrorCode {
         unsafe {
@@ -1333,7 +1334,7 @@ impl SensorCollection for TalonSRX {}
 /// VEX Victor SPX Motor Controller when used on CAN Bus.
 #[derive(Debug)]
 pub struct VictorSPX {
-    handle: Handle,
+    handle: *mut c_void,
     arb_id: i32,
 }
 
@@ -1348,7 +1349,7 @@ impl MotorController for VictorSPX {
     }
 
     #[doc(hidden)]
-    fn handle(&self) -> Handle {
+    fn handle(&self) -> *mut c_void {
         self.handle
     }
     fn get_base_id(&self) -> i32 {

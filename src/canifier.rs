@@ -1,10 +1,11 @@
 //! CANifier
 
-use ctre_sys::canifier::*;
-pub use ctre_sys::canifier::{
+use ctre_sys::*;
+pub use ctre_sys::ctre::phoenix::{
     CANifierControlFrame as ControlFrame, CANifierStatusFrame as StatusFrame,
-    CANifierVelocityMeasPeriod as VelocityMeasPeriod, GeneralPin,
+    CANifierVelocityMeasPeriod as VelocityMeasPeriod
 };
+pub use ctre_sys::CANifier_CCI::GeneralPin;
 #[cfg(feature = "usage-reporting")]
 use wpilib_sys::usage::report_usage;
 
@@ -64,6 +65,8 @@ impl StickyFaults {
 }
 impl_binary_fmt!(StickyFaults);
 
+
+use std::os::raw::c_void;
 /**
  * CTRE CANifier
  *
@@ -71,7 +74,7 @@ impl_binary_fmt!(StickyFaults);
  */
 #[derive(Debug)]
 pub struct CANifier {
-    handle: Handle,
+    handle: *mut c_void,
 }
 impl CANifier {
     /// Constructor.
@@ -172,7 +175,7 @@ impl CANifier {
     /// Gets the PWM Input.
     /// Returns a 2-array holding the Pulse Width (microseconds) [0] and Period (microseconds) [1].
     pub fn get_pwm_input(&self, pwm_channel: PWMChannel) -> Result<[f64; 2]> {
-        cci_get_call!(c_CANifier_GetPWMInput(self.handle, pwm_channel as u32, _: [f64; 2]))
+        cci_get_array!(c_CANifier_GetPWMInput(self.handle, pwm_channel as u32, _: [f64; 2]))
     }
 
     pub fn get_last_error(&self) -> ErrorCode {
@@ -220,7 +223,7 @@ impl CANifier {
         &mut self,
         param: ParamEnum,
         value: f64,
-        sub_value: i32,
+        sub_value: u8,
         ordinal: i32,
         timeout_ms: i32,
     ) -> ErrorCode {
@@ -306,7 +309,7 @@ impl CANifier {
     pub fn set_status_frame_period(
         &self,
         frame: StatusFrame,
-        period_ms: i32,
+        period_ms: u8,
         timeout_ms: i32,
     ) -> ErrorCode {
         unsafe { c_CANifier_SetStatusFramePeriod(self.handle, frame as _, period_ms, timeout_ms) }
