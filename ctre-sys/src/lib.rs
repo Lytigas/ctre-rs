@@ -1,37 +1,33 @@
 //! Rust bindings for the CTRE Phoenix CCI libraries.
 
-#[cfg(feature = "serde")]
-#[macro_use]
-extern crate serde;
+mod bindings;
 
-mod enums;
-pub use self::enums::*;
+#[doc(inline)]
+pub use bindings::root::*;
 
-pub mod canifier;
-pub mod logger;
-pub mod mot;
-pub mod pigeon;
 
+
+// root stuff
+use ctre::phoenix;
 use std::fmt;
-
-impl ErrorCode {
+impl phoenix::ErrorCode {
     /// Returns `true` if the error code is `OK`.
     #[inline]
     pub fn is_ok(self) -> bool {
-        self == ErrorCode::OK
+        self == phoenix::ErrorCode::OK
     }
 
     /// Returns `true` if the error code is not `OK`.
     #[inline]
     pub fn is_err(self) -> bool {
-        self != ErrorCode::OK
+        self != phoenix::ErrorCode::OK
     }
 
     /// Returns `err` if `self` is `OK`, otherwise returns `self`.
     /// Intended for use by the `ctre` crate only.
     pub fn or(self, err: Self) -> Self {
         match self {
-            ErrorCode::OK => err,
+            phoenix::ErrorCode::OK => err,
             _ => self,
         }
     }
@@ -39,19 +35,19 @@ impl ErrorCode {
     /// Returns an `Ok` if the error code is `OK`, or an `Err` otherwise.
     pub fn into_res(self) -> Result<(), Self> {
         match self {
-            ErrorCode::OK => Ok(()),
+            phoenix::ErrorCode::OK => Ok(()),
             _ => Err(self),
         }
     }
 }
 
-impl std::error::Error for ErrorCode {
+impl std::error::Error for phoenix::ErrorCode {
     fn description(&self) -> &str {
         "Error in CTRE Phoenix"
     }
 }
 
-impl fmt::Display for ErrorCode {
+impl fmt::Display for phoenix::ErrorCode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // yeah uhm CTRE pls fix your Logger CCI
         write!(f, "{:?}", self)
@@ -59,7 +55,7 @@ impl fmt::Display for ErrorCode {
 }
 
 #[cfg(feature = "try_trait")]
-impl std::ops::Try for ErrorCode {
+impl std::ops::Try for phoenix::ErrorCode {
     type Ok = ();
     type Error = Self;
 
@@ -77,3 +73,57 @@ impl std::ops::Try for ErrorCode {
         ErrorCode::OK
     }
 }
+
+
+// canifier stuff
+
+#[doc(hidden)]
+pub enum _CANifierHandle {}
+/// A handle representing a CANifier.
+pub type CANifierHandle = *mut _CANifierHandle;
+
+
+// motor stuff
+#[doc(hidden)]
+pub enum _MotHandle {}
+/// A handle representing a motor controller.
+pub type MotHandle = *mut _MotHandle;
+
+use phoenix::motorcontrol;
+impl Default for motorcontrol::DemandType {
+    #[inline]
+    fn default() -> motorcontrol::DemandType {
+        motorcontrol::DemandType::Neutral
+    }
+}
+impl Default for motorcontrol::FollowerType {
+    #[inline]
+    fn default() -> motorcontrol::FollowerType {
+        motorcontrol::FollowerType::PercentOutput
+    }
+}
+use std::os::raw;
+use phoenix::motion;
+impl From<raw::c_int> for motion::SetValueMotionProfile {
+    fn from(value: raw::c_int) -> motion::SetValueMotionProfile {
+        match value {
+            0 => motion::SetValueMotionProfile::Disable,
+            1 => motion::SetValueMotionProfile::Enable,
+            2 => motion::SetValueMotionProfile::Hold,
+            _ => panic!("Invalid raw c_int to SetValueMotionProfile"),
+        }
+    }
+}
+// impl Default for motion::SetValueMotionProfile {
+//     #[inline]
+//     fn default() -> motion::SetValueMotionProfile {
+//         motion::SetValueMotionProfile::Invalid
+//     }
+// }
+
+
+// pigeon stuff
+#[doc(hidden)]
+pub enum _PigeonHandle {}
+/// A handle representing a Pigeon IMU.
+pub type PigeonHandle = *mut _PigeonHandle;

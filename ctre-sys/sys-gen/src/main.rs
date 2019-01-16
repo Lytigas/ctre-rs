@@ -51,13 +51,13 @@ fn generate_bindings() {
             "{}",
             ctre_sys_dir().join("gen").join("all_wrapper.hpp").display()
         ))
-        // .enable_cxx_namespaces()
+        .enable_cxx_namespaces()
         .whitelist_function("(c_MotController|c_CANifier|c_Logger|c_PigeonIMU)_[A-Za-z0-9_]+")
         .whitelist_type("ctre::phoenix::(ParamEnum|CANifierControlFrame|CANifierStatusFrame|CANifierVelocityMeasPeriod)")
         .whitelist_type("ctre::phoenix::motorcontrol::(ControlFrame|ControlFrameEnhanced|DemandType|FeedbackDevice|RemoteFeedbackDevice|FollowerType|LimitSwitchSource|RemoteLimitSwitchSource|LimitSwitchNormal|NeutralMode|RemoteSensorSource|SensorTerm|StatusFrameEnhanced|StatusFrame|VelocityMeasPeriod)")
         .whitelist_type("ctre::phoenix::motion::(SetValueMotionProfile|TrajectoryPoint|MotionProfileStatus)")
-        // .whitelist_var(SYMBOL_REGEX)
-        .whitelist_type("HALUsageReporting::.*")
+        .whitelist_type("ctre::phoenix::sensors::(PigeonIMU_ControlFrame|PigeonIMU_StatusFrame)")
+        .whitelist_type("CANifier_CCI::GeneralPin")
         .default_enum_style(bindgen::EnumVariation::Rust)
         .parse_callbacks(Box::new(BindgenCallbacks))
         .clang_arg(format!("-I{}", ctre_sys_dir().join("include").display()))
@@ -68,7 +68,7 @@ fn generate_bindings() {
     println!("builder_args: {:?}", bindings.command_line_flags());
     let out = bindings.generate().expect("Unable to generate bindings");
 
-    out.write_to_file(output_dir().join("ctre_sys_bindings.rs"))
+    out.write_to_file(output_dir().join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
     println!();
