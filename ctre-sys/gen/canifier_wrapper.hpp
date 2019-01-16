@@ -1,4 +1,4 @@
-#include "ctre/phoenix/CCI/CANifier_CCI.h"
+#include "ctre/phoenix/cci/CANifier_CCI.h"
 
 #include "ctre/phoenix/CANifierControlFrame.h"
 #include "ctre/phoenix/CANifierStatusFrame.h"

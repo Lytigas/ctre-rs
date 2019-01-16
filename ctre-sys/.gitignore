@@ -1,3 +1,7 @@
+tmp
+lib
+include
+src/ctre_sys_bindings.rs
 /lib
 /target
 **/*.rs.bk
