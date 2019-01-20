@@ -10,7 +10,7 @@ categories = ["api-bindings", "embedded", "hardware-support"]
 description = "Bindings for CTR Electronics' Phoenix for FRC libraries"
 
 [features]
-default = ["usage-reporting"]
+# default = ["usage-reporting"]
 serde = ["ctre-sys/serde"]
 usage-reporting = ["wpilib-sys"]
 
@@ -18,8 +18,9 @@ usage-reporting = ["wpilib-sys"]
 ctre-sys = { path = "ctre-sys", version = "5.12.1" }
 
 [dependencies.wpilib-sys]
+# default = true
 optional = true
-version = "0.3.0"
+version = "0.4.0"
 
 [workspace]
 members = [".", "ctre-sys", "ctre-sys/sys-gen"]

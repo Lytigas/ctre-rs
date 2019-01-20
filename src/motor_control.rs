@@ -1,13 +1,13 @@
 //! Support for motor controllers (Talon SRX and Victor SPX).
 use std::ffi::c_void;
 
-use ctre_sys::*;
 pub use ctre_sys::ctre::phoenix::motorcontrol::{
     ControlFrame, ControlFrameEnhanced, ControlMode, DemandType, FeedbackDevice, FollowerType,
     LimitSwitchNormal, LimitSwitchSource, NeutralMode, RemoteFeedbackDevice,
     RemoteLimitSwitchSource, RemoteSensorSource, SensorTerm, StatusFrame, StatusFrameEnhanced,
     VelocityMeasPeriod,
 };
+use ctre_sys::*;
 #[cfg(feature = "usage-reporting")]
 use wpilib_sys::usage::report_usage;
 
