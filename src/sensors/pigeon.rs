@@ -1,9 +1,9 @@
 //! Pigeon IMU
 
-use ctre_sys::*;
 pub use ctre_sys::ctre::phoenix::sensors::{
     PigeonIMU_ControlFrame as ControlFrame, PigeonIMU_StatusFrame as StatusFrame,
 };
+use ctre_sys::*;
 use std::fmt;
 #[cfg(feature = "usage-reporting")]
 use wpilib_sys::usage::report_usage;
@@ -233,7 +233,6 @@ impl StickyFaults {
     }
 }
 impl_binary_fmt!(StickyFaults);
-
 
 use std::os::raw::c_void;
 /**

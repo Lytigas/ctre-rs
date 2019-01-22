@@ -6,6 +6,9 @@ CCI_PREFIX := http://devsite.ctr-electronics.com/maven/release/com/ctre/phoenix/
 CORE_PREFIX := http://devsite.ctr-electronics.com/maven/release/com/ctre/phoenix/core/$(PHEONIX_VERISON)/core-$(PHEONIX_VERISON)
 
 
+generate: extract_cci
+	cd sys-gen; cargo run;
+
 extract_cci:
 	mkdir -p tmp
 	mkdir -p include
@@ -18,8 +21,6 @@ extract_cci:
 
 	cd tmp; wget $(CORE_PREFIX)-headers.zip
 	unzip -o tmp/core-$(PHEONIX_VERISON)-headers.zip -d include
-
-
 
 clean:
 	rm -r tmp/*

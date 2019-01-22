@@ -5,8 +5,6 @@ mod bindings;
 #[doc(inline)]
 pub use bindings::root::*;
 
-
-
 // root stuff
 use ctre::phoenix;
 use std::fmt;
@@ -38,6 +36,11 @@ impl phoenix::ErrorCode {
             phoenix::ErrorCode::OK => Ok(()),
             _ => Err(self),
         }
+    }
+}
+impl Into<std::result::Result<(), phoenix::ErrorCode>> for phoenix::ErrorCode {
+    fn into(self) -> std::result::Result<(), phoenix::ErrorCode> {
+        self.into_res()
     }
 }
 
@@ -74,14 +77,12 @@ impl std::ops::Try for phoenix::ErrorCode {
     }
 }
 
-
 // canifier stuff
 
 #[doc(hidden)]
 pub enum _CANifierHandle {}
 /// A handle representing a CANifier.
 pub type CANifierHandle = *mut _CANifierHandle;
-
 
 // motor stuff
 #[doc(hidden)]
@@ -102,8 +103,39 @@ impl Default for motorcontrol::FollowerType {
         motorcontrol::FollowerType::PercentOutput
     }
 }
-use std::os::raw;
+impl Default for motorcontrol::FeedbackDevice {
+    #[inline]
+    fn default() -> motorcontrol::FeedbackDevice {
+        motorcontrol::FeedbackDevice::QuadEncoder
+    }
+}
+impl Default for motorcontrol::LimitSwitchSource {
+    #[inline]
+    fn default() -> motorcontrol::LimitSwitchSource {
+        motorcontrol::LimitSwitchSource::FeedbackConnector
+    }
+}
+impl Default for motorcontrol::LimitSwitchNormal {
+    #[inline]
+    fn default() -> motorcontrol::LimitSwitchNormal {
+        motorcontrol::LimitSwitchNormal::NormallyOpen
+    }
+}
+impl Default for motorcontrol::RemoteSensorSource {
+    #[inline]
+    fn default() -> motorcontrol::RemoteSensorSource {
+        motorcontrol::RemoteSensorSource::Off
+    }
+}
+impl Default for motorcontrol::VelocityMeasPeriod {
+    #[inline]
+    fn default() -> motorcontrol::VelocityMeasPeriod {
+        motorcontrol::VelocityMeasPeriod::Period_100Ms
+    }
+}
+
 use phoenix::motion;
+use std::os::raw;
 impl From<raw::c_int> for motion::SetValueMotionProfile {
     fn from(value: raw::c_int) -> motion::SetValueMotionProfile {
         match value {
@@ -120,7 +152,6 @@ impl From<raw::c_int> for motion::SetValueMotionProfile {
 //         motion::SetValueMotionProfile::Invalid
 //     }
 // }
-
 
 // pigeon stuff
 #[doc(hidden)]

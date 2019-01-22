@@ -1,11 +1,11 @@
 //! CANifier
 
-use ctre_sys::*;
 pub use ctre_sys::ctre::phoenix::{
     CANifierControlFrame as ControlFrame, CANifierStatusFrame as StatusFrame,
-    CANifierVelocityMeasPeriod as VelocityMeasPeriod
+    CANifierVelocityMeasPeriod as VelocityMeasPeriod,
 };
 pub use ctre_sys::CANifier_CCI::GeneralPin;
+use ctre_sys::*;
 #[cfg(feature = "usage-reporting")]
 use wpilib_sys::usage::report_usage;
 
@@ -64,7 +64,6 @@ impl StickyFaults {
     }
 }
 impl_binary_fmt!(StickyFaults);
-
 
 use std::os::raw::c_void;
 /**
@@ -208,7 +207,11 @@ impl CANifier {
     ) -> ErrorCode {
         unsafe { c_CANifier_ConfigVelocityMeasurementPeriod(self.handle, period as _, timeout_ms) }
     }
-    pub fn config_velocity_measurement_window(&mut self, window: i32, timeout_ms: i32) -> ErrorCode {
+    pub fn config_velocity_measurement_window(
+        &mut self,
+        window: i32,
+        timeout_ms: i32,
+    ) -> ErrorCode {
         unsafe { c_CANifier_ConfigVelocityMeasurementWindow(self.handle, window, timeout_ms) }
     }
 

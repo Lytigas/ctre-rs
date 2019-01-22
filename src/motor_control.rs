@@ -16,6 +16,8 @@ use super::{
     ErrorCode, ParamEnum, Result,
 };
 
+pub mod config;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Faults(i32);
 impl Faults {
@@ -239,7 +241,7 @@ pub trait MotorController: private::Sealed {
         &mut self,
         seconds_from_neutral_to_full: f64,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigOpenLoopRamp(
                 self.handle(),
@@ -247,12 +249,13 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_closedloop_ramp(
         &mut self,
         seconds_from_neutral_to_full: f64,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigClosedLoopRamp(
                 self.handle(),
@@ -260,30 +263,36 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
-    fn config_peak_output_forward(&mut self, percent_out: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_peak_output_forward(&mut self, percent_out: f64, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigPeakOutputForward(self.handle(), percent_out, timeout_ms) }
+            .into()
     }
-    fn config_peak_output_reverse(&mut self, percent_out: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_peak_output_reverse(&mut self, percent_out: f64, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigPeakOutputReverse(self.handle(), percent_out, timeout_ms) }
+            .into()
     }
 
-    fn config_nominal_output_forward(&mut self, percent_out: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_nominal_output_forward(&mut self, percent_out: f64, timeout_ms: i32) -> Result<()> {
         unsafe {
             c_MotController_ConfigNominalOutputForward(self.handle(), percent_out, timeout_ms)
         }
+        .into()
     }
-    fn config_nominal_output_reverse(&mut self, percent_out: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_nominal_output_reverse(&mut self, percent_out: f64, timeout_ms: i32) -> Result<()> {
         unsafe {
             c_MotController_ConfigNominalOutputReverse(self.handle(), percent_out, timeout_ms)
         }
+        .into()
     }
 
-    fn config_neutral_deadband(&mut self, percent_deadband: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_neutral_deadband(&mut self, percent_deadband: f64, timeout_ms: i32) -> Result<()> {
         unsafe {
             c_MotController_ConfigNeutralDeadband(self.handle(), percent_deadband, timeout_ms)
         }
+        .into()
     }
 
     /**
@@ -297,8 +306,9 @@ pub trait MotorController: private::Sealed {
      *   If nonzero, function will wait for config success and report an error if it times out.
      *   If zero, no blocking or checking is performed.
      */
-    fn config_voltage_comp_saturation(&mut self, voltage: f64, timeout_ms: i32) -> ErrorCode {
+    fn config_voltage_comp_saturation(&mut self, voltage: f64, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigVoltageCompSaturation(self.handle(), voltage, timeout_ms) }
+            .into()
     }
     /// Configures the voltage measurement filter.
     /// * `filter_window_samples` - Number of samples in the rolling average of voltage measurement.
@@ -306,7 +316,7 @@ pub trait MotorController: private::Sealed {
         &mut self,
         filter_window_samples: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigVoltageMeasurementFilter(
                 self.handle(),
@@ -314,6 +324,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     /// Enable voltage compensation.
     /// If enabled, voltage compensation works in all control modes.
@@ -354,7 +365,7 @@ pub trait MotorController: private::Sealed {
         feedback_device: RemoteFeedbackDevice,
         pid_idx: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSelectedFeedbackSensor(
                 self.handle(),
@@ -363,6 +374,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     /**
      * The Feedback Coefficient is a scalar applied to the value of the
@@ -384,7 +396,7 @@ pub trait MotorController: private::Sealed {
         coefficient: f64,
         pid_idx: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSelectedFeedbackCoefficient(
                 self.handle(),
@@ -393,6 +405,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /**
@@ -406,7 +419,7 @@ pub trait MotorController: private::Sealed {
         remote_sensor_source: RemoteSensorSource,
         remote_ordinal: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigRemoteFeedbackFilter(
                 self.handle(),
@@ -416,6 +429,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /**
@@ -430,7 +444,7 @@ pub trait MotorController: private::Sealed {
         sensor_term: SensorTerm,
         feedback_device: FeedbackDevice,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSensorTerm(
                 self.handle(),
@@ -439,6 +453,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /// Get the selected sensor position (in raw sensor units).
@@ -461,7 +476,7 @@ pub trait MotorController: private::Sealed {
         sensor_pos: i32,
         pid_idx: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_SetSelectedSensorPosition(
                 self.handle(),
@@ -470,20 +485,23 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
-    fn set_control_frame_period(&self, frame: ControlFrame, period_ms: i32) -> ErrorCode {
+    fn set_control_frame_period(&self, frame: ControlFrame, period_ms: i32) -> Result<()> {
         unsafe { c_MotController_SetControlFramePeriod(self.handle(), frame as _, period_ms) }
+            .into()
     }
     fn set_status_frame_period(
         &self,
         frame: StatusFrame,
         period_ms: u8,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_SetStatusFramePeriod(self.handle(), frame as _, period_ms, timeout_ms)
         }
+        .into()
     }
     fn get_status_frame_period(&self, frame: StatusFrame, timeout_ms: i32) -> Result<i32> {
         cci_get_call!(
@@ -511,7 +529,7 @@ pub trait MotorController: private::Sealed {
         normal_open_or_close: LimitSwitchNormal,
         device_id: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigForwardLimitSwitchSource(
                 self.handle(),
@@ -521,6 +539,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     /**
      * Configures the reverse limit switch for a remote source.
@@ -542,7 +561,7 @@ pub trait MotorController: private::Sealed {
         normal_open_or_close: LimitSwitchNormal,
         device_id: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigReverseLimitSwitchSource(
                 self.handle(),
@@ -552,16 +571,17 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn override_limit_switches_enable(&self, enable: bool) {
-        unsafe { c_MotController_OverrideLimitSwitchesEnable(self.handle(), enable) }
+        unsafe { c_MotController_OverrideLimitSwitchesEnable(self.handle(), enable) }.into()
     }
 
     fn config_forward_soft_limit_threshold(
         &mut self,
         forward_sensor_limit: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigForwardSoftLimitThreshold(
                 self.handle(),
@@ -569,12 +589,13 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_reverse_soft_limit_threshold(
         &mut self,
         reverse_sensor_limit: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigReverseSoftLimitThreshold(
                 self.handle(),
@@ -582,12 +603,15 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
-    fn config_forward_soft_limit_enable(&mut self, enable: bool, timeout_ms: i32) -> ErrorCode {
+    fn config_forward_soft_limit_enable(&mut self, enable: bool, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigForwardSoftLimitEnable(self.handle(), enable, timeout_ms) }
+            .into()
     }
-    fn config_reverse_soft_limit_enable(&mut self, enable: bool, timeout_ms: i32) -> ErrorCode {
+    fn config_reverse_soft_limit_enable(&mut self, enable: bool, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigReverseSoftLimitEnable(self.handle(), enable, timeout_ms) }
+            .into()
     }
     fn override_soft_limits_enable(&self, enable: bool) {
         unsafe { c_MotController_OverrideSoftLimitsEnable(self.handle(), enable) }
@@ -595,19 +619,19 @@ pub trait MotorController: private::Sealed {
 
     // current limiting is Talon-specific
 
-    fn config_kp(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_Config_kP(self.handle(), slot_idx, value, timeout_ms) }
+    fn config_kp(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_Config_kP(self.handle(), slot_idx, value, timeout_ms) }.into()
     }
-    fn config_ki(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_Config_kI(self.handle(), slot_idx, value, timeout_ms) }
+    fn config_ki(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_Config_kI(self.handle(), slot_idx, value, timeout_ms) }.into()
     }
-    fn config_kd(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_Config_kD(self.handle(), slot_idx, value, timeout_ms) }
+    fn config_kd(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_Config_kD(self.handle(), slot_idx, value, timeout_ms) }.into()
     }
-    fn config_kf(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_Config_kF(self.handle(), slot_idx, value, timeout_ms) }
+    fn config_kf(&mut self, slot_idx: i32, value: f64, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_Config_kF(self.handle(), slot_idx, value, timeout_ms) }.into()
     }
-    fn config_integral_zone(&mut self, slot_idx: i32, izone: i32, timeout_ms: i32) -> ErrorCode {
+    fn config_integral_zone(&mut self, slot_idx: i32, izone: i32, timeout_ms: i32) -> Result<()> {
         unsafe {
             c_MotController_Config_IntegralZone(
                 self.handle(),
@@ -616,13 +640,14 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_allowable_closedloop_error(
         &mut self,
         slot_idx: i32,
         allowable_closed_loop_error: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigAllowableClosedloopError(
                 self.handle(),
@@ -631,13 +656,14 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_max_integral_accumulator(
         &mut self,
         slot_idx: i32,
         iaccum: f64,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigMaxIntegralAccumulator(
                 self.handle(),
@@ -646,13 +672,14 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_closed_loop_peak_output(
         &mut self,
         slot_idx: i32,
         percent_out: f64,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigClosedLoopPeakOutput(
                 self.handle(),
@@ -661,13 +688,14 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_closed_loop_period(
         &mut self,
         slot_idx: i32,
         loop_time_ms: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigClosedLoopPeriod(
                 self.handle(),
@@ -676,8 +704,9 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
-    fn config_aux_pid_polarity(&mut self, invert: bool, timeout_ms: i32) -> ErrorCode {
+    fn config_aux_pid_polarity(&mut self, invert: bool, timeout_ms: i32) -> Result<()> {
         self.config_set_parameter(
             ParamEnum::ePIDLoopPolarity,
             invert as i8 as f64,
@@ -686,10 +715,11 @@ pub trait MotorController: private::Sealed {
             timeout_ms,
         )
     }
-    fn set_integral_accumulator(&self, iaccum: f64, pid_idx: i32, timeout_ms: i32) -> ErrorCode {
+    fn set_integral_accumulator(&self, iaccum: f64, pid_idx: i32, timeout_ms: i32) -> Result<()> {
         unsafe {
             c_MotController_SetIntegralAccumulator(self.handle(), iaccum, pid_idx, timeout_ms)
         }
+        .into()
     }
     fn get_closed_loop_error(&self, pid_idx: i32) -> Result<i32> {
         cci_get_call!(c_MotController_GetClosedLoopError(self.handle(), _: i32, pid_idx))
@@ -702,8 +732,8 @@ pub trait MotorController: private::Sealed {
         cci_get_call!(c_MotController_GetErrorDerivative(self.handle(), _: f64, pid_idx))
     }
     /// Selects which profile slot to use for closed-loop control.
-    fn select_profile_slot(&self, slot_idx: i32, pid_idx: i32) -> ErrorCode {
-        unsafe { c_MotController_SelectProfileSlot(self.handle(), slot_idx, pid_idx) }
+    fn select_profile_slot(&self, slot_idx: i32, pid_idx: i32) -> Result<()> {
+        unsafe { c_MotController_SelectProfileSlot(self.handle(), slot_idx, pid_idx) }.into()
     }
     fn get_closed_loop_target(&self, pid_idx: i32) -> Result<i32> {
         cci_get_call!(c_MotController_GetClosedLoopTarget(self.handle(), _: i32, pid_idx))
@@ -728,7 +758,7 @@ pub trait MotorController: private::Sealed {
         &mut self,
         sensor_units_per_100ms: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigMotionCruiseVelocity(
                 self.handle(),
@@ -736,6 +766,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     /// Sets the Motion Magic Acceleration.
     /// This is the target acceleration that the motion magic curve generator can use.
@@ -743,7 +774,7 @@ pub trait MotorController: private::Sealed {
         &mut self,
         sensor_units_per_100ms_per_sec: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigMotionAcceleration(
                 self.handle(),
@@ -751,12 +782,13 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /// Clear the buffered motion profile in both motor controller's RAM (bottom),
     /// and in the API (top).
-    fn clear_motion_profile_trajectories(&self) -> ErrorCode {
-        unsafe { c_MotController_ClearMotionProfileTrajectories(self.handle()) }
+    fn clear_motion_profile_trajectories(&self) -> Result<()> {
+        unsafe { c_MotController_ClearMotionProfileTrajectories(self.handle()) }.into()
     }
     /**
      * Retrieve just the buffer count for the api-level (top) buffer.
@@ -771,7 +803,7 @@ pub trait MotorController: private::Sealed {
     }
     /// Push another trajectory point into the top level buffer (which is emptied
     /// into the motor controller's bottom buffer as room allows).
-    fn push_motion_profile_trajectory(&self, traj_pt: &TrajectoryPoint) -> ErrorCode {
+    fn push_motion_profile_trajectory(&self, traj_pt: &TrajectoryPoint) -> Result<()> {
         unsafe {
             c_MotController_PushMotionProfileTrajectory_2(
                 self.handle(),
@@ -785,6 +817,7 @@ pub trait MotorController: private::Sealed {
                 traj_pt.timeDur as _,
             )
         }
+        .into()
     }
     /**
      * Retrieve just the buffer full for the api-level (top) buffer.
@@ -845,8 +878,8 @@ pub trait MotorController: private::Sealed {
     }
     /// Clear the "Has Underrun" flag.
     /// Typically this is called after application has confirmed an underrun had occured.
-    fn clear_motion_profile_has_underrun(&self, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_ClearMotionProfileHasUnderrun(self.handle(), timeout_ms) }
+    fn clear_motion_profile_has_underrun(&self, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ClearMotionProfileHasUnderrun(self.handle(), timeout_ms) }.into()
     }
     /**
      * Calling application can opt to speed up the handshaking between the robot API
@@ -854,8 +887,8 @@ pub trait MotorController: private::Sealed {
      * Ideally the period should be no more than half the period of a trajectory
      * point.
      */
-    fn change_motion_control_frame_period(&self, period_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_ChangeMotionControlFramePeriod(self.handle(), period_ms) }
+    fn change_motion_control_frame_period(&self, period_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ChangeMotionControlFramePeriod(self.handle(), period_ms) }.into()
     }
     /**
      * When trajectory points are processed in the motion profile executer, the MPE determines
@@ -877,7 +910,7 @@ pub trait MotorController: private::Sealed {
         &mut self,
         base_traj_duration_ms: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigMotionProfileTrajectoryPeriod(
                 self.handle(),
@@ -885,6 +918,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /**
@@ -892,8 +926,8 @@ pub trait MotorController: private::Sealed {
      * Not all functions return an error code but can potentially report errors.
      * This function can be used to retrieve those error codes.
      */
-    fn get_last_error(&self) -> ErrorCode {
-        unsafe { c_MotController_GetLastError(self.handle()) }
+    fn get_last_error(&self) -> Result<()> {
+        unsafe { c_MotController_GetLastError(self.handle()) }.into()
     }
 
     fn get_faults(&self) -> Result<Faults> {
@@ -906,8 +940,8 @@ pub trait MotorController: private::Sealed {
             cci_get_call!(c_MotController_GetStickyFaults(self.handle(), _: i32))?,
         ))
     }
-    fn clear_sticky_faults(&self, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_ClearStickyFaults(self.handle(), timeout_ms) }
+    fn clear_sticky_faults(&self, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ClearStickyFaults(self.handle(), timeout_ms) }.into()
     }
 
     /**
@@ -941,10 +975,11 @@ pub trait MotorController: private::Sealed {
         new_value: i32,
         param_index: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSetCustomParam(self.handle(), new_value, param_index, timeout_ms)
         }
+        .into()
     }
     /**
      * Gets the value of a custom parameter.
@@ -974,7 +1009,7 @@ pub trait MotorController: private::Sealed {
         sub_value: u8,
         ordinal: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSetParameter(
                 self.handle(),
@@ -985,6 +1020,7 @@ pub trait MotorController: private::Sealed {
                 timeout_ms,
             )
         }
+        .into()
     }
     fn config_get_parameter(&self, param: ParamEnum, ordinal: i32, timeout_ms: i32) -> Result<f64> {
         cci_get_call!(c_MotController_ConfigGetParameter(
@@ -994,6 +1030,175 @@ pub trait MotorController: private::Sealed {
             ordinal,
             timeout_ms,
         ))
+    }
+
+    fn config_pulse_width_period_filter_window_sz(&self, pulse_width_period_filter_window_sz: i32, timeout_ms: i32) -> Result<()> {
+        unsafe {
+            c_MotController_ConfigPulseWidthPeriod_FilterWindowSz(self.handle(), pulse_width_period_filter_window_sz, timeout_ms)
+        }.into()
+    }
+
+    fn config_pulse_width_period_edges_per_rot(&self, pulse_width_period_edges_per_rot: i32, timeout_ms: i32) -> Result<()> {
+        unsafe {
+            c_MotController_ConfigPulseWidthPeriod_EdgesPerRot(self.handle(), pulse_width_period_edges_per_rot, timeout_ms)
+        }.into()
+    }
+
+    fn config_feedback_not_continuous(&self, feedback_not_continuous: bool, timeout_ms: i32) -> Result<()> {
+        unsafe {
+            c_MotController_ConfigFeedbackNotContinuous(self.handle(), feedback_not_continuous, timeout_ms)
+        }.into()
+    }
+
+    /// Sets the number of velocity samples used in the rolling average velocity measurement.
+    fn config_velocity_measurement_window(
+        &mut self,
+        window_size: i32,
+        timeout_ms: i32,
+    ) -> Result<()> {
+        unsafe {
+            c_MotController_ConfigVelocityMeasurementWindow(self.handle(), window_size, timeout_ms)
+        }
+        .into()
+    }
+
+    /**
+     * Enables clearing the position of the feedback sensor when the forward
+     * limit switch is triggered
+     *
+     * @param clearPositionOnLimitF     Whether clearing is enabled, defaults false
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_clear_position_on_limit_f(&self,  clear_position_on_limit_f: bool,  timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigClearPositionOnLimitF(self.handle(), clear_position_on_limit_f, timeout_ms) }.into()
+    }
+
+    /**
+     * Disables going to neutral (brake/coast) when a remote sensor is no longer detected.
+     *
+     * @param remoteSensorClosedLoopDisableNeutralOnLOS     disable going to neutral
+     *
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_remote_sensor_closed_loop_disable_neutral_on_los(&self,  remote_sensor_closed_loop_disable_neutral_on_los: bool,  timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigRemoteSensorClosedLoopDisableNeutralOnLOS(self.handle(), remote_sensor_closed_loop_disable_neutral_on_los, timeout_ms) }.into()
+    }
+
+    /**
+     * Configures all filter persistant settings.
+     *
+     * @param filter        Object with all of the filter persistant settings
+     * @param ordinal       0 for remote sensor 0 and 1 for remote sensor 1.
+     * @param timeoutMs
+     *              Timeout value in ms. If nonzero, function will wait for
+     *              config success and report an error if it times out.
+     *              If zero, no blocking or checking is performed.
+     *
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn configure_filter(&mut self, filter: &config::FilterConfiguration, ordinal: i32, timeout_ms: i32) -> Result<()> {
+        self.config_remote_feedback_filter(filter.remoteSensorDeviceID, filter.remoteSensorSource, ordinal, timeout_ms)
+    }
+
+    /**
+     * Enables clearing the position of the feedback sensor when the reverse
+     * limit switch is triggered
+     *
+     * @param clearPositionOnLimitR     Whether clearing is enabled, defaults false
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_clear_position_on_limit_r(&self,  clear_position_on_limit_r: bool,  timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigClearPositionOnLimitR(self.handle(), clear_position_on_limit_r, timeout_ms) }.into()
+    }
+
+    /**
+     * Configures all base PID set persistant settings.
+     *
+     * @param pid           Object with all of the base PID set persistant settings
+     * @param pidIdx        0 for Primary closed-loop. 1 for auxiliary closed-loop.
+     * @param timeoutMs
+     *              Timeout value in ms. If nonzero, function will wait for
+     *              config success and report an error if it times out.
+     *              If zero, no blocking or checking is performed.
+     *
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn base_configure_pid(&mut self, pid: &config::BasePIDSetConfig, pid_idx: i32, timeout_ms: i32) -> Result<()> {
+        self.config_selected_feedback_coefficient(pid.selectedFeedbackCoefficient, pid_idx, timeout_ms)
+    }
+
+    /**
+     * Disables soft limits triggering (if enabled) when the sensor is no longer detected.
+     *
+     * @param softLimitDisableNeutralOnLOS    disable triggering
+     *
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_soft_limit_disable_neutral_on_los(&self, soft_limit_disable_neutral_on_los: bool, timeout_ms: i32) -> Result<()> {
+        unsafe {c_MotController_ConfigSoftLimitDisableNeutralOnLOS(self.handle(), soft_limit_disable_neutral_on_los, timeout_ms)}.into()
+    }
+
+    /**
+     * Configures the period of each velocity sample.
+     * Every 1ms a position value is sampled, and the delta between that sample
+     * and the position sampled kPeriod ms ago is inserted into a filter.
+     * kPeriod is configured with this function.
+     */
+    fn config_velocity_measurement_period(
+        &mut self,
+        period: VelocityMeasPeriod,
+        timeout_ms: i32,
+    ) -> Result<()> {
+        unsafe {
+            c_MotController_ConfigVelocityMeasurementPeriod(self.handle(), period as _, timeout_ms)
+        }
+        .into()
+    }
+
+    /**
+     * Disables limit switches triggering (if enabled) when the sensor is no longer detected.
+     *
+     * @param limitSwitchDisableNeutralOnLOS    disable triggering
+     *
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_limit_switch_disable_neutral_on_los(&self, limit_switch_disable_neutral_on_los: bool, timeout_ms: i32) -> Result<()> {
+    unsafe { c_MotController_ConfigLimitSwitchDisableNeutralOnLOS(self.handle(), limit_switch_disable_neutral_on_los, timeout_ms)
+    }.into()}
+
+    /**
+     * Enables clearing the position of the feedback sensor when the quadrature index signal
+     * is detected
+     *
+     * @param clearPositionOnQuadidx    Whether clearing is enabled, defaults false
+     * @param timeoutMs
+     *            Timeout value in ms. If nonzero, function will wait for
+     *            config success and report an error if it times out.
+     *            If zero, no blocking or checking is performed.
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn config_clear_position_on_quad_idx(&self, clear_position_on_quad_idx: bool,  timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigClearPositionOnQuadIdx(self.handle(), clear_position_on_quad_idx, timeout_ms)}.into()
     }
 
     /**
@@ -1019,6 +1224,127 @@ pub trait MotorController: private::Sealed {
             }
         };
     }
+
+    fn config_factory_default(&self, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigFactoryDefault(self.handle(), timeout_ms) }.into()
+    }
+
+    /**
+     * Configures all slot persistant settings.
+     *
+     * @param slot        Object with all of the slot persistant settings
+     * @param slotIdx     Parameter slot for the constant.
+     * @param timeoutMs
+     *              Timeout value in ms. If nonzero, function will wait for
+     *              config success and report an error if it times out.
+     *              If zero, no blocking or checking is performed.
+     *
+     * @return Error Code generated by function. 0 indicates no error.
+     */
+    fn configure_slot(&mut self, slot: &config::SlotConfiguration, slot_idx: i32, timeout_ms: i32) -> Result<()> {
+
+        //------ General Close loop ----------//
+        self.config_kp(slot_idx, slot.kP, timeout_ms)?;
+        self.config_ki(slot_idx, slot.kI, timeout_ms)?;
+        self.config_kd(slot_idx, slot.kD, timeout_ms)?;
+        self.config_kf(slot_idx, slot.kF, timeout_ms)?;
+        self.config_integral_zone(slot_idx, slot.integralZone, timeout_ms)?;
+        self.config_allowable_closedloop_error(slot_idx, slot.allowableClosedloopError, timeout_ms)?;
+        self.config_max_integral_accumulator(slot_idx, slot.maxIntegralAccumulator, timeout_ms)?;
+        self.config_closed_loop_peak_output(slot_idx, slot.closedLoopPeakOutput, timeout_ms)?;
+        self.config_closed_loop_period(slot_idx, slot.closedLoopPeriod, timeout_ms)?;
+
+        Ok(())
+    }
+
+    fn base_config_all(&mut self, config: &config::BaseMotorConfig, timeout_ms: i32) -> Result<()> {
+        self.config_factory_default(timeout_ms)?;
+
+        //----- general output shaping ------------------//
+        self.config_openloop_ramp(config.openloopRamp, timeout_ms)?;
+        self.config_closedloop_ramp(config.closedloopRamp, timeout_ms)?;
+        self.config_peak_output_forward(config.peakOutputForward, timeout_ms)?;
+        self.config_peak_output_reverse(config.peakOutputReverse, timeout_ms)?;
+        self.config_nominal_output_forward(config.nominalOutputForward, timeout_ms)?;
+        self.config_nominal_output_reverse(config.nominalOutputReverse, timeout_ms)?;
+        self.config_neutral_deadband(config.neutralDeadband, timeout_ms)?;
+
+        //------ Voltage Compensation ----------//
+        self.config_voltage_comp_saturation(config.voltageCompSaturation, timeout_ms)?;
+        self.config_voltage_measurement_filter(config.voltageMeasurementFilter, timeout_ms)?;
+
+        //----- velocity signal conditionaing ------//
+        self.config_velocity_measurement_period(config.velocityMeasurementPeriod, timeout_ms)?;
+        self.config_velocity_measurement_window(config.velocityMeasurementWindow, timeout_ms)?;
+
+        //------ soft limit ----------//
+        self.config_forward_soft_limit_threshold(config.forwardSoftLimitThreshold, timeout_ms)?;
+        self.config_reverse_soft_limit_threshold(config.reverseSoftLimitThreshold, timeout_ms)?;
+        self.config_forward_soft_limit_enable(config.forwardSoftLimitEnable, timeout_ms)?;
+        self.config_reverse_soft_limit_enable(config.reverseSoftLimitEnable, timeout_ms)?;
+
+        //------ limit switch ----------//
+        /* not in base */
+
+        //------ Current Lim ----------//
+        /* not in base */
+
+        //--------Slots---------------//
+
+        self.configure_slot(&config.slot_0, 0, timeout_ms)?;
+        self.configure_slot(&config.slot_1, 1, timeout_ms)?;
+        self.configure_slot(&config.slot_2, 2, timeout_ms)?;
+        self.configure_slot(&config.slot_3, 3, timeout_ms)?;
+
+        //---------Auxilary Closed Loop Polarity-------------//
+
+        self.config_aux_pid_polarity(config.auxPIDPolarity, timeout_ms)?;
+
+        //----------Remote Feedback Filters----------//
+        self.configure_filter(&config.filter_0, 0, timeout_ms)?;
+        self.configure_filter(&config.filter_1, 1, timeout_ms)?;
+
+        //------ Motion Profile Settings used in Motion Magic  ----------//
+        self.config_motion_cruise_velocity(config.motionCruiseVelocity, timeout_ms)?;
+        self.config_motion_acceleration(config.motionAcceleration, timeout_ms)?;
+
+        //------ Motion Profile Buffer ----------//
+        self.config_motion_profile_trajectory_period(
+            config.motionProfileTrajectoryPeriod,
+            timeout_ms,
+        )?;
+
+        //------ Custom Persistent Params ----------//
+        self.config_set_custom_param(config.custom.customParam_0, 0, timeout_ms)?;
+        self.config_set_custom_param(config.custom.customParam_1, 1, timeout_ms)?;
+
+        self.config_feedback_not_continuous(config.feedbackNotContinuous, timeout_ms)?;
+        self.config_remote_sensor_closed_loop_disable_neutral_on_los(
+            config.remoteSensorClosedLoopDisableNeutralOnLOS,
+            timeout_ms,
+        )?;
+        self.config_clear_position_on_limit_f(config.clearPositionOnLimitF, timeout_ms)?;
+        self.config_clear_position_on_limit_r(config.clearPositionOnLimitR, timeout_ms)?;
+        self.config_clear_position_on_quad_idx(config.clearPositionOnQuadIdx, timeout_ms)?;
+        self.config_limit_switch_disable_neutral_on_los(
+            config.limitSwitchDisableNeutralOnLOS,
+            timeout_ms,
+        )?;
+        self.config_soft_limit_disable_neutral_on_los(
+            config.softLimitDisableNeutralOnLOS,
+            timeout_ms,
+        )?;
+        self.config_pulse_width_period_edges_per_rot(
+            config.pulseWidthPeriod_EdgesPerRot,
+            timeout_ms,
+        )?;
+        self.config_pulse_width_period_filter_window_sz(
+            config.pulseWidthPeriod_FilterWindowSz,
+            timeout_ms,
+        )?;
+
+        Ok(())
+    }
 }
 
 /// An interface for getting and setting raw sensor values.
@@ -1026,8 +1352,8 @@ pub trait SensorCollection: MotorController {
     fn get_analog_in(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetAnalogIn(self.handle(), _: i32))
     }
-    fn set_analog_position(&self, new_position: i32, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_SetAnalogPosition(self.handle(), new_position, timeout_ms) }
+    fn set_analog_position(&self, new_position: i32, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_SetAnalogPosition(self.handle(), new_position, timeout_ms) }.into()
     }
     fn get_analog_in_raw(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetAnalogInRaw(self.handle(), _: i32))
@@ -1038,8 +1364,9 @@ pub trait SensorCollection: MotorController {
     fn get_quadrature_position(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetQuadraturePosition(self.handle(), _: i32))
     }
-    fn set_quadrature_position(&self, new_position: i32, timeout_ms: i32) -> ErrorCode {
+    fn set_quadrature_position(&self, new_position: i32, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_SetQuadraturePosition(self.handle(), new_position, timeout_ms) }
+            .into()
     }
     fn get_quadrature_velocity(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetQuadratureVelocity(self.handle(), _: i32))
@@ -1047,8 +1374,9 @@ pub trait SensorCollection: MotorController {
     fn get_pulse_width_position(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetPulseWidthPosition(self.handle(), _: i32))
     }
-    fn set_pulse_width_position(&self, new_position: i32, timeout_ms: i32) -> ErrorCode {
+    fn set_pulse_width_position(&self, new_position: i32, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_SetPulseWidthPosition(self.handle(), new_position, timeout_ms) }
+            .into()
     }
     fn get_pulse_width_velocity(&self) -> Result<i32> {
         cci_get_call!(c_MotController_GetPulseWidthVelocity(self.handle(), _: i32))
@@ -1122,7 +1450,7 @@ impl TalonSRX {
         feedback_device: FeedbackDevice,
         pid_idx: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigSelectedFeedbackSensor(
                 self.handle,
@@ -1131,6 +1459,7 @@ impl TalonSRX {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     // XXX: not provided by CTRE's APIs
@@ -1139,7 +1468,7 @@ impl TalonSRX {
         &self,
         frame: ControlFrameEnhanced,
         period_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe { c_MotController_SetControlFramePeriod(self.handle, frame as _, period_ms) }
     }
     */
@@ -1148,10 +1477,11 @@ impl TalonSRX {
         frame: StatusFrameEnhanced,
         period_ms: u8,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_SetStatusFramePeriod(self.handle, frame as _, period_ms, timeout_ms)
         }
+        .into()
     }
     pub fn get_status_frame_period(
         &self,
@@ -1161,32 +1491,6 @@ impl TalonSRX {
         cci_get_call!(
             c_MotController_GetStatusFramePeriod(self.handle, frame as _, _: i32, timeout_ms)
         )
-    }
-
-    /**
-     * Configures the period of each velocity sample.
-     * Every 1ms a position value is sampled, and the delta between that sample
-     * and the position sampled kPeriod ms ago is inserted into a filter.
-     * kPeriod is configured with this function.
-     */
-    pub fn config_velocity_measurement_period(
-        &mut self,
-        period: VelocityMeasPeriod,
-        timeout_ms: i32,
-    ) -> ErrorCode {
-        unsafe {
-            c_MotController_ConfigVelocityMeasurementPeriod(self.handle, period as _, timeout_ms)
-        }
-    }
-    /// Sets the number of velocity samples used in the rolling average velocity measurement.
-    pub fn config_velocity_measurement_window(
-        &mut self,
-        window_size: i32,
-        timeout_ms: i32,
-    ) -> ErrorCode {
-        unsafe {
-            c_MotController_ConfigVelocityMeasurementWindow(self.handle, window_size, timeout_ms)
-        }
     }
 
     /**
@@ -1211,7 +1515,7 @@ impl TalonSRX {
         type_: LimitSwitchSource,
         normal_open_or_close: LimitSwitchNormal,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigForwardLimitSwitchSource(
                 self.handle,
@@ -1221,6 +1525,7 @@ impl TalonSRX {
                 timeout_ms,
             )
         }
+        .into()
     }
     /**
      * Configures the reverse limit switch for a local/remote source.
@@ -1244,7 +1549,7 @@ impl TalonSRX {
         type_: LimitSwitchSource,
         normal_open_or_close: LimitSwitchNormal,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe {
             c_MotController_ConfigReverseLimitSwitchSource(
                 self.handle,
@@ -1254,6 +1559,7 @@ impl TalonSRX {
                 timeout_ms,
             )
         }
+        .into()
     }
 
     /**
@@ -1275,8 +1581,8 @@ impl TalonSRX {
      *
      * [`config_continuous_current_limit`]: #method.config_continuous_current_limit
      */
-    pub fn config_peak_current_limit(&mut self, amps: i32, timeout_ms: i32) -> ErrorCode {
-        unsafe { c_MotController_ConfigPeakCurrentLimit(self.handle, amps, timeout_ms) }
+    pub fn config_peak_current_limit(&mut self, amps: i32, timeout_ms: i32) -> Result<()> {
+        unsafe { c_MotController_ConfigPeakCurrentLimit(self.handle, amps, timeout_ms) }.into()
     }
     /**
      * Configure the peak allowable duration (when current limit is enabled).
@@ -1301,8 +1607,9 @@ impl TalonSRX {
         &mut self,
         milliseconds: i32,
         timeout_ms: i32,
-    ) -> ErrorCode {
+    ) -> Result<()> {
         unsafe { c_MotController_ConfigPeakCurrentLimit(self.handle, milliseconds, timeout_ms) }
+            .into()
     }
     /**
      * Configure the continuous allowable current-draw (when current limit is enabled).
@@ -1321,11 +1628,61 @@ impl TalonSRX {
      *   If nonzero, function will wait for config success and report an error if it times out.
      *   If zero, no blocking or checking is performed.
      */
-    pub fn config_continuous_current_limit(&mut self, amps: i32, timeout_ms: i32) -> ErrorCode {
+    pub fn config_continuous_current_limit(&mut self, amps: i32, timeout_ms: i32) -> Result<()> {
         unsafe { c_MotController_ConfigContinuousCurrentLimit(self.handle, amps, timeout_ms) }
+            .into_res()
     }
     pub fn enable_current_limit(&self, enable: bool) {
         unsafe { c_MotController_EnableCurrentLimit(self.handle, enable) };
+    }
+
+    /**
+     * Gets all PID set persistant settings.
+     *
+     * @param pid               Object with all of the PID set persistant settings
+     * @param pidIdx            0 for Primary closed-loop. 1 for auxiliary closed-loop.
+     * @param timeoutMs
+     *              Timeout value in ms. If nonzero, function will wait for
+     *              config success and report an error if it times out.
+     *              If zero, no blocking or checking is performed.
+     */
+    pub fn configure_pid(&mut self, pid: &config::TalonSRXPIDSetConfiguration,  pid_idx: i32, timeout_ms: i32) -> Result<()> {
+
+
+        //------ sensor selection ----------//
+
+        self.base_configure_pid(&pid.base, pid_idx, timeout_ms)?;
+        self.config_selected_feedback_sensor(pid.selectedFeedbackSensor, pid_idx, timeout_ms)?;
+
+        Ok(())
+    }
+
+    pub fn config_all(&mut self, config: &config::TalonSRXConfig, timeout_ms: i32) -> Result<()> {
+        self.base_config_all(&config.base, timeout_ms)?;
+
+        //------ limit switch ----------//
+        unsafe {c_MotController_ConfigForwardLimitSwitchSource(self.handle, config.forwardLimitSwitchSource as _,
+                config.base.forwardLimitSwitchNormal as _, config.base.forwardLimitSwitchDeviceID, timeout_ms) }.into_res()?;
+        unsafe {c_MotController_ConfigReverseLimitSwitchSource(self.handle, config.reverseLimitSwitchSource as _,
+                config.base.reverseLimitSwitchNormal as _, config.base.reverseLimitSwitchDeviceID, timeout_ms) }.into_res()?;
+
+
+        //--------PIDs---------------//
+
+        self.configure_pid(&config.primaryPID, 0, timeout_ms)?;
+        self.configure_pid(&config.auxilaryPID, 1, timeout_ms)?;
+        self.config_sensor_term(SensorTerm::Sum0, config.sum_0, timeout_ms)?;
+        self.config_sensor_term(SensorTerm::Sum1, config.sum_1, timeout_ms)?;
+        self.config_sensor_term(SensorTerm::Diff0, config.diff_0, timeout_ms)?;
+        self.config_sensor_term(SensorTerm::Diff1, config.diff_1, timeout_ms)?;
+
+        //--------Current Limiting-----//
+        self.config_peak_current_limit(config.peakCurrentLimit, timeout_ms)?;
+        self.config_peak_current_duration(config.peakCurrentDuration, timeout_ms)?;
+        self.config_continuous_current_limit(config.continuousCurrentLimit, timeout_ms)?;
+
+
+        Ok(())
     }
 }
 
