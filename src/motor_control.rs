@@ -153,12 +153,15 @@ pub trait MotorController: private::Sealed {
      * talonRght.set(ControlMode::MotionMagic, targetDistance, DemandType::AuxPID, desiredRobotHeading);
      * ```
      */
-    fn set(&mut self, mode: ControlMode, demand0: f64, demand1_type: DemandType, demand1: f64) {
+    fn set(&mut self, mode: ControlMode, demand0: f64, demand1_type: DemandType, demand1: f64) -> Result<()> {
         match mode {
+            ControlMode::PercentOutput => {
+                unsafe {c_MotController_Set_4(self.handle(), mode as i32, demand0, demand1, demand1_type as i32)}.into_res()
+            },
             ControlMode::Follower => {
                 // did caller specify device ID
                 let work = if 0.0 <= demand0 && demand0 <= 62.0 {
-                    ((self.get_base_id() as u32 >> 16) << 8) | (demand0 as u32)
+                    ((self.get_base_id() as u32 >> 16) << 8) | ((demand0 as u8) as u32)
                 } else {
                     demand0 as u32
                 };
@@ -172,15 +175,13 @@ pub trait MotorController: private::Sealed {
                         demand1,
                         demand1_type as _,
                     )
-                }
+                }.into_res()
             }
             ControlMode::Current => unsafe {
                 // milliamps
                 c_MotController_SetDemand(self.handle(), mode as _, (1000.0 * demand0) as _, 0)
-            },
-            ControlMode::PercentOutput
-            //| ControlMode::TimedPercentOutput
-            | ControlMode::Velocity
+            }.into_res(),
+            ControlMode::Velocity
             | ControlMode::Position
             | ControlMode::MotionMagic
             //| ControlMode::MotionMagicArc
@@ -193,15 +194,15 @@ pub trait MotorController: private::Sealed {
                     demand1,
                     demand1_type as _,
                 )
-            },
+            }.into_res(),
             ControlMode::Disabled => unsafe {
                 c_MotController_SetDemand(self.handle(), mode as _, 0, 0)
-            },
-        };
+            }.into_res(),
+        }
     }
 
     /// Neutral the motor output by setting control mode to disabled.
-    fn neutral_output(&mut self) {
+    fn neutral_output(&mut self) -> Result<()> {
         self.set(ControlMode::Disabled, 0.0, DemandType::Neutral, 0.0)
     }
     /// Sets the mode of operation during neutral throttle output.
@@ -1211,7 +1212,7 @@ pub trait MotorController: private::Sealed {
      *   Use AuxOutput1 to follow the master device's auxiliary output 1.
      *   Use PercentOutput for standard follower mode.
      */
-    fn follow(&mut self, master_to_follow: &impl MotorController, follower_type: FollowerType) {
+    fn follow(&mut self, master_to_follow: &impl MotorController, follower_type: FollowerType) -> Result<()> {
         let base_id = master_to_follow.get_base_id();
         let id24: i32 = ((base_id >> 0x10) << 8) | (base_id & 0xFF);
 
